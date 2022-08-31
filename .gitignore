@@ -1,0 +1,8 @@
+__pycache__/
+
+# Content saved by the application
+saved/
+
+# PyInstaller
+build/
+dist/
