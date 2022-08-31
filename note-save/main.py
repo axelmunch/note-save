@@ -1,4 +1,3 @@
-from configuration import *
 from app import *
 import tkinter as tk
 
