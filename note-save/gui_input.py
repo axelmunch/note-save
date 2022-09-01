@@ -16,6 +16,7 @@ class Input_frame():
 
         self.frame.bind_all("<<Paste>>", self.event_paste)
         self.frame.bind_all("<Escape>", self.event_escape)
+        self.frame.bind_all("<Return>", self.event_enter)
 
         # Attachments
         self.images = []
@@ -60,9 +61,13 @@ class Input_frame():
     def set_collection(self, collection):
         self.collection = collection
 
+    def is_text_empty(self):
+        # Return True if the text is empty or contains only whitespace characters, False otherwise
+        return len(self.text) == 0 or self.text.isspace()
+
     def inputs_cleared(self):
         # Return True if all inputs are cleared, False otherwise
-        return len(self.text) == 0 and len(self.images) == 0
+        return self.is_text_empty() and len(self.images) == 0
 
     def event_escape(self, event = None):
         # Get the text in the input
@@ -81,6 +86,12 @@ class Input_frame():
         if len(self.images) > 0:
             # Update the images on the screen
             self.image_update()
+
+    def event_enter(self, event = None):
+        self.get_text()
+        # If the text is empty or contains only whitespace characters and there is at least one image, trigger the save event
+        if self.is_text_empty() and len(self.images) > 0:
+            self.event_save()
 
     def event_save(self):
         # Saving the inputs
