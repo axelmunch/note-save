@@ -1,6 +1,8 @@
 # The main frame with inputs
 
 from configuration import *
+from save import *
+from clipboard_image import *
 import tkinter as tk
 from tkinter import scrolledtext
 from PIL import Image, ImageTk
@@ -12,13 +14,17 @@ class Input_frame():
         self.app = app
         self.frame = tk.Frame(self.window, bg = "red")
 
-        self.frame.bind_all("<<Paste>>", self.paste)
-        self.frame.bind_all("<Escape>", self.escape)
+        self.frame.bind_all("<<Paste>>", self.event_paste)
+        self.frame.bind_all("<Escape>", self.event_escape)
 
-        # Actual images, to be displayed
+        # Attachments
         self.images = []
         # Instances of the Image_frame class
         self.image_cache = []
+
+        self.text = ""
+
+        self.collection = self.app.get_collection()
 
         # GUI
         self.image_container = tk.Frame(self.frame, bg = "yellow")
@@ -31,7 +37,7 @@ class Input_frame():
         self.textbox.pack(side = tk.LEFT, padx = DEFAULT_PADDING, pady = DEFAULT_PADDING)
         self.textbox.focus_set()
 
-        self.button_save = tk.Button(self.frame, text = "Save", command = self.save)
+        self.button_save = tk.Button(self.frame, text = "Save", command = self.event_save)
         self.button_save.pack(side = tk.RIGHT, padx = DEFAULT_PADDING, pady = DEFAULT_PADDING)
 
         self.show()
@@ -43,53 +49,100 @@ class Input_frame():
         self.frame.pack_forget()
 
     def get_text(self):
-        return self.textbox.get("1.0", "end-1c")
+        self.text = self.textbox.get("1.0", "end-1c")
 
-    def save(self):
-        # Send text to app
-        self.app.set_text(self.get_text())
-        self.clear_text()
-        # Save content event in app
-        self.app.save()
+    def clear_text(self):
+        # Remove the text inside the textbox
+        self.textbox.delete("1.0", tk.END)
+        # Reset the text variable
+        self.get_text()
 
-    def paste(self, event = None):
-        self.app.paste()
+    def set_collection(self, collection):
+        self.collection = collection
 
-    def escape(self, event = None):
-        self.app.escape()
+    def inputs_cleared(self):
+        # Return True if all inputs are cleared, False otherwise
+        return len(self.text) == 0 and len(self.images) == 0
+
+    def event_escape(self, event = None):
+        # Get the text in the input
+        self.get_text()
+
+        # If everything is empty before resetting, it will close the app
+        inputs_cleared = self.inputs_cleared()
+        # Clear the inputs
+        self.reset_inputs()
+
+        self.app.event_escape(inputs_cleared)
+
+    def event_paste(self, event = None):
+        # Something is pasted in the window, if it is images, add them to the list of images
+        self.images += get_clipboard_images()
+        if len(self.images) > 0:
+            # Update the images on the screen
+            self.image_update()
+
+    def event_save(self):
+        # Saving the inputs
+
+        # Set the text variable to the input text
+        self.get_text()
+        # Saving
+        if len(self.text) > 0 or len(self.images) > 0:
+            save(self.collection, self.text, self.images)
+        # Reset the inputs
+        self.reset_inputs(True)
+
+    def reset_inputs(self, full = False):
+        # Reset the inputs, by first resetting the images, then the text. Or resetting everything for a full reset
+
+        if full:
+            # Clear everything
+            self.images = []
+            self.image_update()
+            self.clear_text()
+        elif len(self.images) > 0:
+            # Clear the images first if there are any
+            self.images = []
+            self.image_update()
+        else:
+            # Clear the text when there is no images
+            self.clear_text()
 
     def set_label_images(self):
-        # Set label text, images and quantity or nothing
+        # Set the label text, images and quantity or nothing
         self.label_image_container.config(text = f"Images {len(self.images)}" * (len(self.images) > 0))
 
-    def image_update(self, images):
-        self.images = images
+    def delete_image(self, image):
+        self.images.remove(image)
+        # Update the label containing the number of images
+        self.set_label_images()
+
+    def image_update(self):
+        # Display the images in the image_container
+
+        # Update the label containing the number of images
+        self.set_label_images()
 
         # Delete actual images
         for image in self.image_cache:
             image.hide()
             del image
 
+        # Reset the image cache
         self.image_cache = []
-
-        self.set_label_images()
 
         # Display the images
         for image in self.images:
-            self.image_cache.append(Image_frame(self.image_container, image, self.app, self.set_label_images))
-
-    def clear_text(self):
-        # Remove the text inside the textbox
-        self.textbox.delete("1.0", tk.END)
+            self.image_cache.append(Image_frame(self.image_container, image, self.delete_image))
 
 class Image_frame():
-    def __init__(self, parent, image, app, update_label_function):
-        self.app = app
+    def __init__(self, parent, image, delete_image_function):
         self.parent = parent
         self.image = image
 
-        # To update the image count when deleting an image
-        self.update_label_function = update_label_function
+        # Function to delete an image
+        self.delete_image_function = delete_image_function
 
         # Create a container for the image
         self.frame = tk.Frame(self.parent)
@@ -117,9 +170,8 @@ class Image_frame():
         self.show()
 
     def delete(self):
-        self.app.delete_image(self.image)
+        self.delete_image_function(self.image)
         self.hide()
-        self.update_label_function()
 
     def show(self):
         self.frame.pack()
