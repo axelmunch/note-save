@@ -32,10 +32,10 @@ class Input_frame():
         self.image_container.pack(fill = tk.BOTH, expand = True, padx = DEFAULT_PADDING, pady = DEFAULT_PADDING)
 
         self.label_image_container = tk.Label(self.image_container)
-        self.label_image_container.pack(side = tk.LEFT)
+        self.label_image_container.pack(anchor = tk.NW, padx = DEFAULT_PADDING, pady = DEFAULT_PADDING)
 
         self.textbox = scrolledtext.ScrolledText(self.frame, wrap = tk.WORD, height = TEXT_LINE_HEIGHT)
-        self.textbox.pack(side = tk.LEFT, padx = DEFAULT_PADDING, pady = DEFAULT_PADDING)
+        self.textbox.pack(fill = tk.X, expand = True, side = tk.LEFT, padx = DEFAULT_PADDING, pady = DEFAULT_PADDING)
         self.textbox.focus_set()
 
         self.button_save = tk.Button(self.frame, text = "Save", command = self.event_save)
@@ -98,6 +98,9 @@ class Input_frame():
 
         # Set the text variable to the input text
         self.get_text()
+        # If the text is empty or contains only whitespace characters, delete the text
+        if self.is_text_empty():
+            self.clear_text()
         # Saving
         if len(self.text) > 0 or len(self.images) > 0:
             save(self.collection, self.text, self.images)
@@ -186,6 +189,7 @@ class Image_frame():
 
     def show(self):
         self.frame.pack()
+        # self.frame.grid()
 
     def hide(self):
         self.frame.pack_forget()
