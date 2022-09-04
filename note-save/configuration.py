@@ -1,4 +1,4 @@
-VERSION = "1.0"
+VERSION = "1.1"
 
 SAVE_FOLDER = "saved"
 DEFAULT_COLLECTION_NAME = "Default"
