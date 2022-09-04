@@ -35,5 +35,5 @@ class App:
 
     def set_collection(self, collection):
         self.collection = collection
-        self.input_gui.set_collection(collection)
-        # self.explorer_gui.set_collection(collection) # Uncomment when this GUI is implemented
+        self.input_gui.set_collection(self.collection)
+        # self.explorer_gui.set_collection(self.collection) # Uncomment when this GUI is implemented

@@ -1,6 +1,6 @@
 from configuration import *
+from files import *
 from datetime import datetime
-from os import path, makedirs
 
 
 def get_time():
@@ -15,7 +15,7 @@ def name_image(folder, index = 0):
     image_name = get_time()
 
     # If the folder contains an image with the same name, increment the name
-    if path.isfile(f"{folder}/{image_name}{('_' + str(index)) * (index != 0)}{IMAGE_EXTENSION}"):
+    if is_file(f"{folder}/{image_name}{('_' + str(index)) * (index != 0)}{IMAGE_EXTENSION}"):
         return name_image(folder, index + 1)
     else:
         return f"{image_name}" + f"_{index}" * (index != 0)
@@ -24,9 +24,9 @@ def save(collection, text, images):
     # Save the text and images to the collection folder
 
     # Checking if the collection folder exists
-    if not path.isdir(f"{SAVE_FOLDER}/{collection}"):
+    if not is_folder(f"{SAVE_FOLDER}/{collection}"):
         # If not, create it
-        makedirs(f"{SAVE_FOLDER}/{collection}")
+        create_full_path(f"{SAVE_FOLDER}/{collection}")
 
     # Saving images with a custom name
     image_names = []
