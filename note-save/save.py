@@ -38,7 +38,10 @@ def save(collection, text, images):
         image.save(f"{SAVE_FOLDER}/{collection}/{image_name}{IMAGE_EXTENSION}", IMAGE_EXTENSION_TYPE)
 
     # Saving text with a reference to the images
-    add_text(f"{SAVE_FOLDER}/{collection}/{TEXT_FILE_NAME}", f"{TEXT_MARKER}{TEXT_IMAGE_SEPARATOR.join(image_names)}{TEXT_SEPARATOR}{text}")
+    text_to_save = f"{TEXT_MARKER}{TEXT_IMAGE_SEPARATOR.join(image_names)}{TEXT_SEPARATOR}{text}"
+    if text_to_save[-1] != "\n":
+        text_to_save += "\n"
+    add_text(f"{SAVE_FOLDER}/{collection}/{TEXT_FILE_NAME}", text_to_save)
 
 def add_text(file, text):
     # Add text to a file

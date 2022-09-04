@@ -13,7 +13,7 @@ IMAGE_EXTENSION_TYPE = "PNG"
 TEXT_FILE_NAME = "TEXTS.txt"
 
 # Between each entry
-TEXT_MARKER = "\n§█§\n"
+TEXT_MARKER = "\x1f<§█ Entry █§>"
 # Between image names
 TEXT_IMAGE_SEPARATOR = ", "
 # Between images and text
