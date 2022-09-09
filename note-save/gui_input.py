@@ -105,10 +105,12 @@ class Input_frame():
         # Set the text variable to the input text
         self.get_text()
         # Saving
+        saved = False
         if not self.is_text_empty() or len(self.images) > 0:
-            save(self.collection, self.text, self.images)
+            saved = save(self.collection, self.text, self.images)
         # Reset the inputs
-        self.reset_inputs(True)
+        if saved:
+            self.reset_inputs(True)
 
     def reset_inputs(self, full = False):
         # Reset the inputs, by first resetting the images, then the text. Or resetting everything for a full reset

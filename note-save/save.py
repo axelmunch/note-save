@@ -23,25 +23,31 @@ def name_image(folder, index = 0):
 def save(collection, text, images):
     # Save the text and images to the collection folder
 
-    # Checking if the collection folder exists
-    if not is_folder(f"{SAVE_FOLDER}/{collection}"):
-        # If not, create it
-        create_full_path(f"{SAVE_FOLDER}/{collection}")
+    try:
+        # Checking if the collection folder exists
+        if not is_folder(f"{SAVE_FOLDER}/{collection}"):
+            # If not, create it
+            create_full_path(f"{SAVE_FOLDER}/{collection}")
 
-    # Saving images with a custom name
-    image_names = []
-    for image in images:
-        # Create a name
-        image_name = name_image(f"{SAVE_FOLDER}/{collection}")
-        image_names.append(image_name)
-        # Save
-        image.save(f"{SAVE_FOLDER}/{collection}/{image_name}{IMAGE_EXTENSION}", IMAGE_EXTENSION_TYPE)
+        # Saving images with a custom name
+        image_names = []
+        for image in images:
+            # Create a name
+            image_name = name_image(f"{SAVE_FOLDER}/{collection}")
+            image_names.append(image_name)
+            # Save
+            image.save(f"{SAVE_FOLDER}/{collection}/{image_name}{IMAGE_EXTENSION}", IMAGE_EXTENSION_TYPE)
 
-    # Saving text with a reference to the images
-    text_to_save = f"{TEXT_MARKER}{TEXT_IMAGE_SEPARATOR.join(image_names)}{TEXT_SEPARATOR}{text}"
-    if text_to_save[-1] != "\n":
-        text_to_save += "\n"
-    add_text(f"{SAVE_FOLDER}/{collection}/{TEXT_FILE_NAME}", text_to_save)
+        # Saving text with a reference to the images
+        text_to_save = f"{TEXT_MARKER}{TEXT_IMAGE_SEPARATOR.join(image_names)}{TEXT_SEPARATOR}{text}"
+        if text_to_save[-1] != "\n":
+            text_to_save += "\n"
+        add_text(f"{SAVE_FOLDER}/{collection}/{TEXT_FILE_NAME}", text_to_save)
+    except Exception as e:
+        print(f"Cannot save the content.\n{e}")
+        return False
+
+    return True
 
 def add_text(file, text):
     # Add text to a file
