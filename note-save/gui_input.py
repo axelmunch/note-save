@@ -12,7 +12,7 @@ class Input_frame():
     def __init__(self, window, app):
         self.window = window
         self.app = app
-        self.frame = tk.Frame(self.window, bg = "red")
+        self.frame = tk.Frame(self.window, bg = PRIMARY_BACKGROUND_COLOR)
 
         self.frame.bind_all("<<Paste>>", self.event_paste)
         self.frame.bind_all("<Escape>", self.event_escape)
@@ -29,10 +29,10 @@ class Input_frame():
         self.collection = self.app.get_collection()
 
         # GUI
-        self.image_container = tk.Frame(self.frame, bg = "yellow")
+        self.image_container = tk.Frame(self.frame, bg = SECONDARY_BACKGROUND_COLOR)
         self.image_container.pack(fill = tk.BOTH, expand = True, padx = DEFAULT_PADDING, pady = DEFAULT_PADDING)
 
-        self.label_image_container = tk.Label(self.image_container)
+        self.label_image_container = tk.Label(self.image_container, bg = SECONDARY_BACKGROUND_COLOR, fg = TEXT_COLOR)
         self.label_image_container.pack(anchor = tk.NW, padx = DEFAULT_PADDING, pady = DEFAULT_PADDING)
 
         self.textbox = scrolledtext.ScrolledText(self.frame, wrap = tk.WORD, height = TEXT_LINE_HEIGHT)

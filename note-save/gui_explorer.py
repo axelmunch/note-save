@@ -8,7 +8,7 @@ class Explorer_frame():
     def __init__(self, window, app):
         self.window = window
         self.app = app
-        self.frame = tk.Frame(self.window, bg = "green")
+        self.frame = tk.Frame(self.window, bg = PRIMARY_BACKGROUND_COLOR)
 
         # GUI
 

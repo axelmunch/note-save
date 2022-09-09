@@ -16,13 +16,13 @@ class Banner_frame():
         self.collection = self.app.get_collection()
 
         # GUI
-        self.label = tk.Label(self.frame, text = "Note Save")
+        self.label = tk.Label(self.frame, text = "Note Save", bg = BANNER_BACKGROUND_COLOR, fg = TEXT_COLOR)
         self.label.pack()
 
         self.combobox = ttk.Combobox(self.frame, state = "readonly")
         self.load_collections()
         self.combobox.set(self.collection)
-        self.combobox.pack()
+        self.combobox.pack(padx = DEFAULT_PADDING, pady = DEFAULT_PADDING)
         self.combobox.bind("<<ComboboxSelected>>", self.change_collection)
 
         self.show()
