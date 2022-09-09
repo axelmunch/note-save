@@ -50,7 +50,8 @@ class Input_frame():
         self.frame.pack_forget()
 
     def get_text(self):
-        self.text = self.textbox.get("1.0", "end-1c")
+        # Get the text from the textbox without the whitespaces at the beginning and the end
+        self.text = self.clear_whitespace(self.textbox.get("1.0", "end-1c"))
 
     def clear_text(self):
         # Remove the text inside the textbox
@@ -62,8 +63,12 @@ class Input_frame():
         self.collection = collection
 
     def is_text_empty(self):
-        # Return True if the text is empty or contains only whitespace characters, False otherwise
-        return len(self.text) == 0 or self.text.isspace()
+        # Return True if the text is empty
+        return len(self.text) == 0
+    
+    def clear_whitespace(self, text):
+        # Remove the whitespace characters at the beginning and the end of the text
+        return text.strip()
 
     def inputs_cleared(self):
         # Return True if all inputs are cleared, False otherwise
@@ -93,16 +98,13 @@ class Input_frame():
         if self.is_text_empty() and len(self.images) > 0:
             self.event_save()
 
-    def event_save(self):
+    def event_save(self, event = None):
         # Saving the inputs
 
         # Set the text variable to the input text
         self.get_text()
-        # If the text is empty or contains only whitespace characters, delete the text
-        if self.is_text_empty():
-            self.clear_text()
         # Saving
-        if len(self.text) > 0 or len(self.images) > 0:
+        if not self.is_text_empty() or len(self.images) > 0:
             save(self.collection, self.text, self.images)
         # Reset the inputs
         self.reset_inputs(True)
