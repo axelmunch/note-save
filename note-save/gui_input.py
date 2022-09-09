@@ -17,6 +17,7 @@ class Input_frame():
         self.frame.bind_all("<<Paste>>", self.event_paste)
         self.frame.bind_all("<Escape>", self.event_escape)
         self.frame.bind_all("<Return>", self.event_enter)
+        self.frame.bind_all("<Shift-Return>", self.event_save)
 
         # Attachments
         self.images = []
