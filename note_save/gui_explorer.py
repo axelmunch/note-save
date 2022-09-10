@@ -1,6 +1,6 @@
 # The explorer frame
 
-from configuration import *
+from .configuration import *
 import tkinter as tk
 
 

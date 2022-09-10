@@ -1,4 +1,4 @@
-from configuration import *
+from .configuration import *
 from os import makedirs, listdir, path
 
 
@@ -13,13 +13,13 @@ def list_files(dir_path):
     # Return a list of files and directories in a folder
     if is_folder(dir_path):
         return listdir(dir_path)
-    return None
+    return []
 
 def list_folders(dir_path):
     # Return a list of folders in a folder
     if is_folder(dir_path):
         return [element for element in list_files(dir_path) if is_folder(f"{dir_path}/{element}")]
-    return None
+    return []
 
 def is_file(element_path):
     # Return True if the path is a file, False otherwise

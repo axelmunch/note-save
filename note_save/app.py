@@ -1,7 +1,7 @@
-from configuration import *
-from gui_banner import *
-from gui_input import *
-from gui_explorer import *
+from .configuration import *
+from .gui_banner import *
+from .gui_input import *
+from .gui_explorer import *
 
 
 class App:

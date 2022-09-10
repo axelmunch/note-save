@@ -1,7 +1,7 @@
 # The top banner
 
-from configuration import *
-from files import *
+from .configuration import *
+from .files import *
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
@@ -88,9 +88,10 @@ class Banner_frame():
 
     def load_collections(self):
         folders = list_folders(SAVE_FOLDER)
+        print(DEFAULT_COLLECTION_NAME, folders)
         if DEFAULT_COLLECTION_NAME not in folders:
             folders.append(DEFAULT_COLLECTION_NAME)
-        if folders != None:
+        if len(folders) > 0:
             self.combobox["values"] = folders
         else:
             self.combobox["values"] = [DEFAULT_COLLECTION_NAME]

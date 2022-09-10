@@ -1,5 +1,5 @@
-from configuration import *
-from files import *
+from .configuration import *
+from .files import *
 from datetime import datetime
 
 

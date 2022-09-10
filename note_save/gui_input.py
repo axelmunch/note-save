@@ -1,8 +1,8 @@
 # The main frame with inputs
 
-from configuration import *
-from save import *
-from clipboard_image import *
+from .configuration import *
+from .save import *
+from .clipboard_image import *
 import tkinter as tk
 from tkinter import scrolledtext
 from PIL import Image, ImageTk

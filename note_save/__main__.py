@@ -1,4 +1,4 @@
-from app import *
+from note_save.app import *
 import tkinter as tk
 
 
