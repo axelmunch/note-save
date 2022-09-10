@@ -4,7 +4,10 @@ from os import makedirs, listdir, path
 
 def create_full_path(dir_path):
     # Create all the directories a full path
-    makedirs(dir_path, exist_ok = True)
+    try:
+        makedirs(dir_path, exist_ok = True)
+    except Exception as e:
+        print(f"Cannot create the folder.\n{e}")
 
 def list_files(dir_path):
     # Return a list of files and directories in a folder

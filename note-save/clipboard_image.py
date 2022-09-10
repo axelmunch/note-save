@@ -2,7 +2,7 @@ from PIL import Image, ImageGrab
 
 
 def get_clipboard():
-    # Image, list of filenames or None
+    # Image, list of file names or None
     return ImageGrab.grabclipboard()
 
 def load_image(path):
@@ -18,9 +18,10 @@ def get_clipboard_images():
     clipboard_content = get_clipboard()
     if isinstance(clipboard_content, Image.Image):
         # Is a single image
-        return [clipboard_content]
+        images.append(clipboard_content)
     
-    if isinstance(clipboard_content, list):
+    elif isinstance(clipboard_content, list):
+        # Is a list of paths
         for path in clipboard_content:
             data = load_image(path)
             if data != None:
