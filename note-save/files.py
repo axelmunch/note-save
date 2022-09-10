@@ -1,3 +1,4 @@
+from configuration import *
 from os import makedirs, listdir, path
 
 
@@ -24,3 +25,9 @@ def is_file(element_path):
 def is_folder(element_path):
     # Return True if the path is a folder, False otherwise
     return path.isdir(element_path)
+
+def valid_file_name(text):
+    for char in text:
+        if char not in VALID_FILE_NAME_CHARACTERS:
+            return False
+    return True

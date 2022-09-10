@@ -76,41 +76,45 @@ class Input_frame():
         return self.is_text_empty() and len(self.images) == 0
 
     def event_escape(self, event = None):
-        # Get the text in the input
-        self.get_text()
+        if not self.app.get_ignore_events():
+            # Get the text in the input
+            self.get_text()
 
-        # If everything is empty before resetting, it will close the app
-        inputs_cleared = self.inputs_cleared()
-        # Clear the inputs
-        self.reset_inputs()
+            # If everything is empty before resetting, it will close the app
+            inputs_cleared = self.inputs_cleared()
+            # Clear the inputs
+            self.reset_inputs()
 
-        self.app.event_escape(inputs_cleared)
+            self.app.event_escape(inputs_cleared)
 
     def event_paste(self, event = None):
-        # Something is pasted in the window, if it is images, add them to the list of images
-        self.images += get_clipboard_images()
-        if len(self.images) > 0:
-            # Update the images on the screen
-            self.image_update()
+        if not self.app.get_ignore_events():
+            # Something is pasted in the window, if it is images, add them to the list of images
+            self.images += get_clipboard_images()
+            if len(self.images) > 0:
+                # Update the images on the screen
+                self.image_update()
 
     def event_enter(self, event = None):
-        self.get_text()
-        # If the text is empty or contains only whitespace characters and there is at least one image, trigger the save event
-        if self.is_text_empty() and len(self.images) > 0:
-            self.event_save()
+        if not self.app.get_ignore_events():
+            self.get_text()
+            # If the text is empty or contains only whitespace characters and there is at least one image, trigger the save event
+            if self.is_text_empty() and len(self.images) > 0:
+                self.event_save()
 
     def event_save(self, event = None):
         # Saving the inputs
 
-        # Set the text variable to the input text
-        self.get_text()
-        # Saving
-        saved = False
-        if not self.is_text_empty() or len(self.images) > 0:
-            saved = save(self.collection, self.text, self.images)
-        # Reset the inputs
-        if saved:
-            self.reset_inputs(True)
+        if not self.app.get_ignore_events():
+            # Set the text variable to the input text
+            self.get_text()
+            # Saving
+            saved = False
+            if not self.is_text_empty() or len(self.images) > 0:
+                saved = save(self.collection, self.text, self.images)
+            # Reset the inputs
+            if saved:
+                self.reset_inputs(True)
 
     def reset_inputs(self, full = False):
         # Reset the inputs, by first resetting the images, then the text. Or resetting everything for a full reset

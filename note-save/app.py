@@ -23,12 +23,22 @@ class App:
         # Hide this frame by default
         self.explorer_gui.hide()
 
+        # Ignore the events if a child window is open
+        self.ignore_events = False
+
+    def get_ignore_events(self):
+        return self.ignore_events
+
+    def set_ignore_events(self, ignore_events):
+        self.ignore_events = ignore_events
+
     def event_escape(self, inputs_cleared = False):
         # Event pressing escape
 
-        # If everything is empty, close the window
-        if inputs_cleared:
-            self.root.destroy()
+        if not self.get_ignore_events():
+            # If everything is empty, close the window
+            if inputs_cleared:
+                self.root.destroy()
 
     def get_collection(self):
         return self.collection
