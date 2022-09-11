@@ -5,6 +5,7 @@ from .files import *
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
+from os import startfile, path
 
 
 class Banner_frame():
@@ -30,6 +31,9 @@ class Banner_frame():
         self.add_button = tk.Button(self.frame, text = '+', command = self.event_button_add)
         self.add_button.pack(padx = DEFAULT_PADDING, pady = DEFAULT_PADDING)
 
+        self.open_button = tk.Button(self.frame, text = "Open", command = self.event_open_collection)
+        self.open_button.pack(padx = DEFAULT_PADDING, pady = DEFAULT_PADDING)
+
         self.show()
 
     def show(self):
@@ -37,6 +41,14 @@ class Banner_frame():
 
     def hide(self):
         self.frame.pack_forget()
+    
+    def event_open_collection(self, event = None):
+        # Open the collection folder
+
+        try:
+            startfile(path.realpath(f"{SAVE_FOLDER}/{self.collection}"))
+        except Exception as e:
+            messagebox.showwarning(title = "Warning", message = f"This collection cannot be opened.\n{e}")
 
     def event_button_add(self, event = None):
         # Open a child window to ask for the name of the new collection
