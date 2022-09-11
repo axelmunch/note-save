@@ -88,7 +88,6 @@ class Banner_frame():
 
     def load_collections(self):
         folders = list_folders(SAVE_FOLDER)
-        print(DEFAULT_COLLECTION_NAME, folders)
         if DEFAULT_COLLECTION_NAME not in folders:
             folders.append(DEFAULT_COLLECTION_NAME)
         if len(folders) > 0:

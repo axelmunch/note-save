@@ -9,6 +9,10 @@ class App:
         self.root = root
 
         root.title("Note Save")
+        try:
+            root.iconbitmap("icon.ico")
+        except:
+            root.iconbitmap("note_save/icon.ico")
 
         self.collection = DEFAULT_COLLECTION_NAME
 
