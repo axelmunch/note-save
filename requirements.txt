@@ -1,0 +1,3 @@
+Pillow
+pylint
+pyinstaller
