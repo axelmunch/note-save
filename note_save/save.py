@@ -1,28 +1,29 @@
-from .configuration import *
-from .files import *
+""" Images and text saving """
+
 from datetime import datetime
+from .configuration import SAVE_FOLDER, TEXT_FILE_NAME, IMAGE_EXTENSION, IMAGE_EXTENSION_TYPE,\
+    TEXT_MARKER, TEXT_IMAGE_SEPARATOR, TEXT_SEPARATOR
+from .files import create_full_path, is_file, is_folder
 
 
 def get_time():
-    # Return the current time in the format "YYYY-MM-DD_HH-MM-SS"
-
+    """ Return the current time in the format "YYYY-MM-DD_HH-MM-SS" """
     return datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
-def name_image(folder, index = 0):
-    # Return a name for the image containing the current time accounting for duplicates
 
-    # Generate a name for the image based on the time
+def name_image(folder, index=0):
+    """ Return a name for the image containing the current time and accounting for duplicates """
     image_name = get_time()
 
-    # If the folder contains an image with the same name, increment the name
+    # If the folder already contains an image with the same name, increment the name
     if is_file(f"{folder}/{image_name}{('_' + str(index)) * (index != 0)}{IMAGE_EXTENSION}"):
         return name_image(folder, index + 1)
     else:
         return f"{image_name}" + f"_{index}" * (index != 0)
 
-def save(collection, text, images):
-    # Save the text and images to the collection folder
 
+def save(collection, text, images):
+    """ Save the text and images to the collection folder """
     try:
         # Checking if the collection folder exists
         if not is_folder(f"{SAVE_FOLDER}/{collection}"):
@@ -36,21 +37,22 @@ def save(collection, text, images):
             image_name = name_image(f"{SAVE_FOLDER}/{collection}")
             image_names.append(image_name)
             # Save
-            image.save(f"{SAVE_FOLDER}/{collection}/{image_name}{IMAGE_EXTENSION}", IMAGE_EXTENSION_TYPE)
+            image.save(
+                f"{SAVE_FOLDER}/{collection}/{image_name}{IMAGE_EXTENSION}", IMAGE_EXTENSION_TYPE)
 
         # Saving text with a reference to the images
         text_to_save = f"{TEXT_MARKER}{TEXT_IMAGE_SEPARATOR.join(image_names)}{TEXT_SEPARATOR}{text}"
         if text_to_save[-1] != "\n":
             text_to_save += "\n"
         add_text(f"{SAVE_FOLDER}/{collection}/{TEXT_FILE_NAME}", text_to_save)
-    except Exception as e:
-        print(f"Cannot save the content.\n{e}")
+    except Exception as error:
+        print(f"Cannot save the content.\n{error}")
         return False
 
     return True
 
-def add_text(file, text):
-    # Add text to a file
 
-    with open(file, 'a', encoding = "utf8") as f:
-        f.write(text)
+def add_text(file, text):
+    """ Append text to a file """
+    with open(file, 'a', encoding="utf8") as opened_file:
+        opened_file.write(text)

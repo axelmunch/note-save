@@ -1,5 +1,7 @@
-from note_save.app import *
+""" Entry point of the application """
+
 import tkinter as tk
+from note_save.app import App
 
 
 if __name__ == "__main__":
