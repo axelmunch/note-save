@@ -4,7 +4,7 @@ from PIL import Image, ImageGrab
 
 
 def get_clipboard():
-    """ Return an image, a list of file names or None """
+    """Return an image, a list of file names or None"""
     try:
         return ImageGrab.grabclipboard()
     except OSError:
@@ -12,7 +12,7 @@ def get_clipboard():
 
 
 def load_image(path):
-    """ Return the opened Image or None """
+    """Return the opened Image or None"""
     try:
         return Image.open(path)
     except (Image.UnidentifiedImageError, FileNotFoundError):
@@ -20,7 +20,7 @@ def load_image(path):
 
 
 def get_clipboard_images():
-    """ Return a list of images from the clipboard """
+    """Return a list of images from the clipboard"""
     images = []
 
     clipboard_content = get_clipboard()

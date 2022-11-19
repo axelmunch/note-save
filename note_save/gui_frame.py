@@ -2,13 +2,13 @@
 
 
 class Frame:
-    """ Frame """
+    """Frame"""
 
     def __init__(self, window, app):
         pass
 
     def show(self):
-        """ Show the frame """
+        """Show the frame"""
 
     def hide(self):
-        """ Hide the frame """
+        """Hide the frame"""
