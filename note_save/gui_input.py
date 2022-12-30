@@ -9,6 +9,7 @@ from .clipboard_image import get_clipboard_images
 from .configuration import (
     DEFAULT_PADDING,
     MAX_PREVIEW_IMAGE_SIZE,
+    PREVIEW_INPUT_IMAGES_BY_LINE,
     PRIMARY_BACKGROUND_COLOR,
     SECONDARY_BACKGROUND_COLOR,
     TEXT_COLOR,
@@ -23,9 +24,8 @@ class InputFrame(Frame):
 
     def __init__(self, window, app):
         super().__init__(window, app)
-        self.window = window
         self.app = app
-        self.frame = tk.Frame(self.window, bg=PRIMARY_BACKGROUND_COLOR)
+        self.frame = tk.Frame(window, bg=PRIMARY_BACKGROUND_COLOR)
 
         self.frame.bind_all("<<Paste>>", self.event_paste)
         self.frame.bind_all("<Escape>", self.event_escape)
@@ -42,21 +42,17 @@ class InputFrame(Frame):
         self.collection = self.app.get_collection()
 
         # GUI
-        self.image_container = tk.Frame(
-            self.frame, bg=SECONDARY_BACKGROUND_COLOR
+        self.images_label = tk.Label(
+            self.frame, bg=PRIMARY_BACKGROUND_COLOR, fg=TEXT_COLOR
         )
+        self.images_label.pack(anchor=tk.NW, padx=DEFAULT_PADDING, pady=DEFAULT_PADDING)
+
+        self.image_container = tk.Frame(self.frame, bg=SECONDARY_BACKGROUND_COLOR)
         self.image_container.pack(
             fill=tk.BOTH,
             expand=True,
             padx=DEFAULT_PADDING,
-            pady=DEFAULT_PADDING,
-        )
-
-        self.label_image_container = tk.Label(
-            self.image_container, bg=SECONDARY_BACKGROUND_COLOR, fg=TEXT_COLOR
-        )
-        self.label_image_container.pack(
-            anchor=tk.NW, padx=DEFAULT_PADDING, pady=DEFAULT_PADDING
+            ipady=DEFAULT_PADDING,
         )
 
         self.textbox = scrolledtext.ScrolledText(
@@ -71,12 +67,8 @@ class InputFrame(Frame):
         )
         self.textbox.focus_set()
 
-        self.button_save = tk.Button(
-            self.frame, text="Save", command=self.event_save
-        )
-        self.button_save.pack(
-            side=tk.RIGHT, padx=DEFAULT_PADDING, pady=DEFAULT_PADDING
-        )
+        self.button_save = tk.Button(self.frame, text="Save", command=self.event_save)
+        self.button_save.pack(side=tk.RIGHT, padx=DEFAULT_PADDING, pady=DEFAULT_PADDING)
 
         self.show()
 
@@ -87,8 +79,7 @@ class InputFrame(Frame):
         self.frame.pack_forget()
 
     def get_text(self):
-        """Get the text from the textbox without the
-        whitespaces at the beginning and the end"""
+        """Get the text from the textbox without the whitespaces at the beginning and the end"""
         self.text = self.clear_whitespace(self.textbox.get("1.0", "end-1c"))
 
     def clear_text(self):
@@ -106,8 +97,7 @@ class InputFrame(Frame):
         return len(self.text) == 0
 
     def clear_whitespace(self, text):
-        """Remove the whitespace characters at
-        the beginning and the end of the text"""
+        """Remove the whitespace characters at the beginning and the end of the text"""
         return text.strip()
 
     def inputs_cleared(self):
@@ -115,8 +105,7 @@ class InputFrame(Frame):
         return self.is_text_empty() and len(self.images) == 0
 
     def event_escape(self, event=None):
-        """When the escape key is pressed,
-        reset the inputs or exit the application"""
+        """When the escape key is pressed, reset the inputs or exit the application"""
         del event
         if not self.app.get_ignore_events():
             # Get the text in the input
@@ -140,12 +129,11 @@ class InputFrame(Frame):
                 self.image_update()
 
     def event_enter(self, event=None):
-        """The enter key is pressed"""
+        """New line in text or save images"""
         del event
         if not self.app.get_ignore_events():
             self.get_text()
-            # If the text is empty and there is at least
-            # one image, trigger the save event
+            # If the text is empty and there is at least one image, trigger the save event
             if self.is_text_empty() and len(self.images) > 0:
                 self.event_save()
 
@@ -164,7 +152,7 @@ class InputFrame(Frame):
                 self.reset_inputs(True)
 
     def reset_inputs(self, full=False):
-        """Reset the inputs in two steps or reset everything"""
+        """Reset the inputs by steps or reset everything"""
         if full:
             # Clear everything
             self.images = []
@@ -178,49 +166,66 @@ class InputFrame(Frame):
             # Clear the text when there is no images
             self.clear_text()
 
-    def set_label_images(self):
+    def set_images_label(self):
         """Set the label text, quantity of images or nothing"""
-        self.label_image_container.config(
-            text=f"Images {len(self.images)}" * (len(self.images) > 0)
+        self.images_label.config(
+            text=f"{len(self.images)} image{'s' * (len(self.images) > 1)}"
+            * (len(self.images) > 0)
         )
 
-    def delete_image(self, image):
-        """Delete an image from the list of images
-        and update the label on the screen"""
+    def delete_image(self, image, image_frame=None):
+        """Delete an image from the list of images and update the label on the screen"""
         self.images.remove(image)
         # Update the label containing the number of images
-        self.set_label_images()
+        self.set_images_label()
+        # Delete the container
+        if image_frame is not None:
+            self.image_cache.remove(image_frame)
+        # Replace images on the grid
+        self.replace_images()
 
     def image_update(self):
         """Display the images in the image container"""
 
         # Update the label containing the number of images
-        self.set_label_images()
+        self.set_images_label()
+
+        # Reset the cache
+        self.image_cache = []
 
         # Delete actual images
         for widget in self.image_container.winfo_children():
-            if not isinstance(widget, tk.Label):
-                widget.destroy()
+            widget.grid_forget()
+            widget.destroy()
 
-        # Reset the image cache
-        self.image_cache = []
+        # Empty element to reset size
+        tk.Frame(self.image_container, width=0, height=0).grid()
 
         # Display the images
-        for image in self.images:
+        for index, image in enumerate(self.images):
             self.image_cache.append(
-                ImageFrame(self.image_container, image, self.delete_image)
+                ImageFrame(self.image_container, image, self.delete_image, index)
             )
+
+    def replace_images(self):
+        """Replace the images on the grid"""
+        for index, cache in enumerate(self.image_cache):
+            cache.index = index
+            cache.show()
 
 
 class ImageFrame:
     """An image container with a delete button"""
 
-    def __init__(self, parent, image, delete_image_function):
+    def __init__(self, parent, image, delete_image_function, index):
         self.parent = parent
         self.image = image
 
         # Function to delete the image
         self.delete_image_function = delete_image_function
+
+        # Index of the image in the list of images for grid placement
+        self.index = index
 
         # Create a container for the image
         self.frame = tk.Frame(self.parent)
@@ -230,14 +235,10 @@ class ImageFrame:
         image_height = self.image.height
         if image_width > image_height:
             resize_width = MAX_PREVIEW_IMAGE_SIZE
-            resize_height = int(
-                image_height / (image_width / MAX_PREVIEW_IMAGE_SIZE)
-            )
+            resize_height = int(image_height / (image_width / MAX_PREVIEW_IMAGE_SIZE))
         else:
             resize_height = MAX_PREVIEW_IMAGE_SIZE
-            resize_width = int(
-                image_width / (image_height / MAX_PREVIEW_IMAGE_SIZE)
-            )
+            resize_width = int(image_width / (image_height / MAX_PREVIEW_IMAGE_SIZE))
         image_resized = self.image.resize(
             (resize_width, resize_height), Image.ANTIALIAS
         )
@@ -255,16 +256,21 @@ class ImageFrame:
 
     def delete(self):
         """Delete the image"""
-        self.delete_image_function(self.image)
+        self.delete_image_function(self.image, self)
         self.image = None
         self.display_image = None
+
         self.hide()
 
     def show(self):
         """Show the image container"""
-        self.frame.pack()
-        # self.frame.grid()
+        self.frame.grid(
+            row=self.index // PREVIEW_INPUT_IMAGES_BY_LINE,
+            column=self.index % PREVIEW_INPUT_IMAGES_BY_LINE,
+            padx=DEFAULT_PADDING,
+            pady=DEFAULT_PADDING,
+        )
 
     def hide(self):
         """Hide the image container"""
-        self.frame.pack_forget()
+        self.frame.grid_forget()
