@@ -50,6 +50,7 @@ class App:
 
     def change_ui(self, new_ui):
         """Change the current UI and set the others invisible"""
+
         self.current_ui = new_ui
         match self.current_ui:
             case UI.INPUT:
@@ -58,6 +59,15 @@ class App:
             case UI.EXPLORER:
                 self.input_gui.hide()
                 self.explorer_gui.show()
+
+        self.resize()
+
+    def resize(self):
+        """Resize the window"""
+        self.root.geometry("")
+        self.root.minsize(0, 0)
+        self.root.update()
+        self.root.minsize(self.root.winfo_width(), self.root.winfo_height())
 
     def get_ignore_events(self):
         """Return if the events should be ignored"""
