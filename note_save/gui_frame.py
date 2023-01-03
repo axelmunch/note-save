@@ -1,4 +1,4 @@
-""" Abstract class for application frames """
+"""Abstract class for application frames"""
 
 
 class Frame:

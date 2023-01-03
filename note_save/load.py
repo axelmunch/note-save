@@ -1,4 +1,4 @@
-""" Loading texts and image names in a collection """
+"""Loading texts and image names from a collection"""
 
 from .configuration import (
     SAVE_FOLDER,

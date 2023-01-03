@@ -1,4 +1,4 @@
-""" Images and text saving """
+"""Images and text saving"""
 
 from datetime import datetime
 
@@ -20,14 +20,12 @@ def get_time():
 
 
 def name_image(folder, index=0):
-    """Return a name for the image containing the
-    current time and accounting for duplicates"""
+    """Return a name for the image containing the current time and accounting for duplicates"""
     image_name = get_time()
 
     # If the folder already contains an image with the same name, increment it
     if is_file(
-        f"{folder}/{image_name}{('_' + str(index)) * (index != 0)}"
-        f"{IMAGE_EXTENSION}"
+        f"{folder}/{image_name}{('_' + str(index)) * (index != 0)}{IMAGE_EXTENSION}"
     ):
         return name_image(folder, index + 1)
     return f"{image_name}" + f"_{index}" * (index != 0)

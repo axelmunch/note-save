@@ -1,4 +1,4 @@
-""" Enumeration of the UIs """
+"""Enumeration of the UIs"""
 
 from enum import Enum
 

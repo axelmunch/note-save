@@ -1,4 +1,4 @@
-""" Getting images from the clipboard """
+"""Getting images from the clipboard"""
 
 from PIL import Image, ImageGrab
 

@@ -1,7 +1,6 @@
 {
     "python.languageServer": "Pylance",
     "python.formatting.provider": "black",
-    "python.formatting.blackArgs": ["--line-length", "79"],
     "python.linting.enabled": true,
     "python.linting.pylintEnabled": true,
     "python.linting.mypyEnabled": true,
