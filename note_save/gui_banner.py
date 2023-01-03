@@ -163,6 +163,10 @@ class BannerFrame(Frame):
         # Don't add new line character if return is pressed
         return "break"
 
+    def event_escape(self):
+        """Close new collection window if opened"""
+        self.event_close_collection_window()
+
     def load_collections(self):
         """Load the collections name list from the save folder"""
         folders = list_folders(SAVE_FOLDER)

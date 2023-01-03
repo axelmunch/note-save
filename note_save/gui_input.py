@@ -28,7 +28,6 @@ class InputFrame(Frame):
         self.frame = tk.Frame(window, bg=PRIMARY_BACKGROUND_COLOR)
 
         self.frame.bind_all("<<Paste>>", self.event_paste)
-        self.frame.bind_all("<Escape>", self.event_escape)
         self.frame.bind_all("<Return>", self.event_save)
         self.frame.bind_all("<Shift-Return>", self.event_enter)
 
@@ -104,19 +103,19 @@ class InputFrame(Frame):
         """Return True if all inputs are cleared, False otherwise"""
         return self.is_text_empty() and len(self.images) == 0
 
-    def event_escape(self, event=None):
-        """When the escape key is pressed, reset the inputs or exit the application"""
-        del event
-        if not self.app.get_ignore_events():
-            # Get the text in the input
-            self.get_text()
+    def event_escape(self):
+        """Reset the inputs, return True when the inputs are cleared"""
 
-            # If everything is empty before resetting, it will close the app
-            inputs_cleared = self.inputs_cleared()
-            # Clear the inputs
-            self.reset_inputs()
+        # Get the text in the input
+        self.get_text()
 
-            self.app.event_escape(inputs_cleared)
+        # If everything is empty before resetting, it will close the app
+        inputs_cleared = self.inputs_cleared()
+        # Clear the inputs
+        self.reset_inputs()
+
+        # If the inputs are already cleared, close the app
+        return inputs_cleared and self.inputs_cleared()
 
     def event_paste(self, event=None):
         """Something is pasted in the window"""

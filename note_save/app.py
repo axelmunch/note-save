@@ -33,6 +33,8 @@ class App:
         # Explorer
         self.explorer_gui = ExplorerFrame(self.root, self)
 
+        self.root.bind_all("<Escape>", self.event_escape)
+
         # Set the default UI to input
         self.change_ui(UI.INPUT)
 
@@ -77,10 +79,18 @@ class App:
         """Set if the events should be ignored"""
         self.ignore_events = ignore_events
 
-    def event_escape(self, inputs_cleared=False):
-        """If the inputs are cleared and events are not ignored, exit the application"""
-        if not self.get_ignore_events() and inputs_cleared:
-            self.root.destroy()
+    def event_escape(self, event=None):
+        """Send escape event to the others GUIs and exit the application"""
+        del event
+        if self.get_ignore_events():
+            # Close new collection window
+            self.banner_gui.event_escape()
+            return
+        if self.current_ui == UI.INPUT:
+            # Clear inputs
+            if not self.input_gui.event_escape():
+                return
+        self.quit()
 
     def get_collection(self):
         """Return the current collection"""
@@ -96,3 +106,7 @@ class App:
         """Add content to the clipboard"""
         self.root.clipboard_clear()
         self.root.clipboard_append(content)
+
+    def quit(self):
+        """Exit the application"""
+        self.root.destroy()
