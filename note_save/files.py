@@ -1,6 +1,6 @@
-""" Managing files and folders """
+"""Managing files and folders"""
 
-from os import listdir, makedirs, path
+from os import listdir, makedirs, path, startfile
 
 from .configuration import VALID_FILE_NAME_CHARACTERS
 
@@ -14,7 +14,7 @@ def create_full_path(dir_path):
 
 
 def list_files(dir_path):
-    """Return a list of files and directories in a folder"""
+    """Return a list of files and folders in a directory"""
     if is_folder(dir_path):
         return listdir(dir_path)
     return []
@@ -47,3 +47,16 @@ def valid_file_name(text):
         if char not in VALID_FILE_NAME_CHARACTERS:
             return False
     return True
+
+
+def open_file_explorer(dir_path):
+    """Open a directory in the file explorer"""
+    startfile(path.realpath(dir_path))
+
+
+def open_file(file_path):
+    """Open a file"""
+    try:
+        startfile(path.realpath(file_path), "open")
+    except OSError as error:
+        print(f"Cannot open the file.\n{error}")

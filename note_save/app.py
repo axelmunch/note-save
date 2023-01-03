@@ -1,4 +1,4 @@
-""" GUI management and logic of the appplication """
+"""GUI management and logic of the appplication"""
 
 from tkinter import TclError
 
@@ -39,7 +39,7 @@ class App:
         self.change_ui(UI.INPUT)
 
         # Ignore the events if a child window is open
-        self.ignore_events = False
+        self.set_ignore_events(False)
 
     def switch_ui(self):
         """Switch UI to Input or Explorer"""
@@ -50,15 +50,17 @@ class App:
 
     def change_ui(self, new_ui):
         """Change the current UI and set the others invisible"""
-
         self.current_ui = new_ui
         match self.current_ui:
             case UI.INPUT:
+                self.banner_gui.set_switch_ui_text("Explore")
                 self.input_gui.show()
                 self.explorer_gui.hide()
             case UI.EXPLORER:
+                self.banner_gui.set_switch_ui_text("Input")
                 self.input_gui.hide()
                 self.explorer_gui.show()
+                self.explorer_gui.full_refresh()
 
         self.resize()
 
@@ -78,8 +80,7 @@ class App:
         self.ignore_events = ignore_events
 
     def event_escape(self, inputs_cleared=False):
-        """If the inputs are cleared and events
-        are not ignored, exit the application"""
+        """If the inputs are cleared and events are not ignored, exit the application"""
         if not self.get_ignore_events() and inputs_cleared:
             self.root.destroy()
 
@@ -92,3 +93,8 @@ class App:
         self.collection = collection
         self.input_gui.set_collection(self.collection)
         self.explorer_gui.set_collection(self.collection)
+
+    def add_to_clipboard(self, content):
+        """Add content to the clipboard"""
+        self.root.clipboard_clear()
+        self.root.clipboard_append(content)

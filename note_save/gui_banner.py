@@ -1,7 +1,6 @@
-""" Top banner GUI """
+"""Top banner GUI"""
 
 import tkinter as tk
-from os import path, startfile
 from tkinter import messagebox, ttk
 
 from .configuration import (
@@ -13,7 +12,7 @@ from .configuration import (
     TEXT_COLOR,
     VALID_FILE_NAME_PATTERN,
 )
-from .files import create_full_path, list_folders, valid_file_name
+from .files import create_full_path, list_folders, open_file_explorer, valid_file_name
 from .gui_frame import Frame
 
 
@@ -22,9 +21,8 @@ class BannerFrame(Frame):
 
     def __init__(self, window, app):
         super().__init__(window, app)
-        self.window = window
         self.app = app
-        self.frame = tk.Frame(self.window, bg=BANNER_BACKGROUND_COLOR)
+        self.frame = tk.Frame(window, bg=BANNER_BACKGROUND_COLOR)
 
         self.collection = self.app.get_collection()
 
@@ -43,20 +41,19 @@ class BannerFrame(Frame):
         self.combobox = ttk.Combobox(self.frame, state="readonly")
         self.load_collections()
         self.combobox.set(self.collection)
-        self.combobox.pack(padx=DEFAULT_PADDING, pady=DEFAULT_PADDING)
-        self.combobox.bind(
-            "<<ComboboxSelected>>", self.event_change_collection
-        )
+        self.combobox.pack(pady=DEFAULT_PADDING)
+        self.combobox.bind("<<ComboboxSelected>>", self.event_change_collection)
 
-        self.add_button = tk.Button(
-            self.frame, text="+", command=self.event_button_add
-        )
-        self.add_button.pack(padx=DEFAULT_PADDING, pady=DEFAULT_PADDING)
+        self.add_button = tk.Button(self.frame, text="+", command=self.event_button_add)
+        self.add_button.pack(pady=DEFAULT_PADDING)
 
         self.open_button = tk.Button(
             self.frame, text="Open", command=self.event_open_collection
         )
-        self.open_button.pack(padx=DEFAULT_PADDING, pady=DEFAULT_PADDING)
+        self.open_button.pack(pady=DEFAULT_PADDING)
+
+        self.switch_ui_button = tk.Button(self.frame, command=self.event_switch_ui)
+        self.switch_ui_button.pack(pady=DEFAULT_PADDING)
 
         self.show()
 
@@ -70,7 +67,7 @@ class BannerFrame(Frame):
         """Open the collection folder"""
         del event
         try:
-            startfile(path.realpath(f"{SAVE_FOLDER}/{self.collection}"))
+            open_file_explorer(f"{SAVE_FOLDER}/{self.collection}")
         except FileNotFoundError as error:
             messagebox.showwarning(
                 title="Warning",
@@ -108,9 +105,7 @@ class BannerFrame(Frame):
         )
         self.new_collection_input.focus_set()
         self.new_collection_input.bind("<Key>", self.event_typing_valid)
-        self.new_collection_input.bind(
-            "<Return>", self.event_enter_collection_name
-        )
+        self.new_collection_input.bind("<Return>", self.event_enter_collection_name)
         # Ok button
         button_ok = tk.Button(
             self.new_collection_window,
@@ -134,6 +129,7 @@ class BannerFrame(Frame):
         """Only allow ASCII characters when typing"""
         if len(event.char) == 1 and ord(event.char) > 127:
             return "break"
+        return True
 
     def event_close_collection_window(self, event=None):
         """Close the child window"""
@@ -148,9 +144,7 @@ class BannerFrame(Frame):
         del event
         if self.new_collection_input is not None:
             # Get the text
-            collection_name = self.new_collection_input.get(
-                "1.0", "end-1c"
-            ).strip()
+            collection_name = self.new_collection_input.get("1.0", "end-1c").strip()
             self.new_collection_input.delete("1.0", tk.END)
             self.new_collection_input.insert(tk.END, collection_name)
             # If the collection is a valid file name
@@ -188,6 +182,7 @@ class BannerFrame(Frame):
 
     def add_collection(self, collection):
         """Creating a new collection"""
+
         # Create the directory
         create_full_path(f"{SAVE_FOLDER}/{collection}")
         # Reload the collections
@@ -196,3 +191,7 @@ class BannerFrame(Frame):
         self.combobox.set(collection)
         # Trigger the collection change event
         self.event_change_collection()
+
+    def set_switch_ui_text(self, text):
+        """Set the Switch UI label text"""
+        self.switch_ui_button.config(text=text)

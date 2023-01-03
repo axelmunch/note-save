@@ -1,4 +1,4 @@
-""" Main GUI """
+"""Main GUI for inputs"""
 
 import tkinter as tk
 from tkinter import scrolledtext
@@ -9,7 +9,7 @@ from .clipboard_image import get_clipboard_images
 from .configuration import (
     DEFAULT_PADDING,
     MAX_PREVIEW_IMAGE_SIZE,
-    PREVIEW_INPUT_IMAGES_BY_LINE,
+    PREVIEW_IMAGES_BY_LINE,
     PRIMARY_BACKGROUND_COLOR,
     SECONDARY_BACKGROUND_COLOR,
     TEXT_COLOR,
@@ -265,8 +265,8 @@ class ImageFrame:
     def show(self):
         """Show the image container"""
         self.frame.grid(
-            row=self.index // PREVIEW_INPUT_IMAGES_BY_LINE,
-            column=self.index % PREVIEW_INPUT_IMAGES_BY_LINE,
+            row=self.index // PREVIEW_IMAGES_BY_LINE,
+            column=self.index % PREVIEW_IMAGES_BY_LINE,
             padx=DEFAULT_PADDING,
             pady=DEFAULT_PADDING,
         )

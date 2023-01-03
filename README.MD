@@ -14,11 +14,11 @@ Note Save is only available on Windows for the moment.
 - Paste an image or a group of images
 - Create collections
 - Get the images in the file explorer
+- Open collection in the app viewer
+- Copy saved text
 
 In future versions :
-  - *Open collection in the app viewer*
   - *Edit or delete what's inside a collection*
-  - *Copy saved text*
 
 ## Usage / Shortcuts
 
