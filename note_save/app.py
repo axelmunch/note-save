@@ -16,13 +16,11 @@ class App:
         self.root = root
 
         root.title("Note Save")
+
         try:
-            root.iconbitmap("icon.ico")
-        except TclError:
-            try:
-                root.iconbitmap("note_save/icon.ico")
-            except TclError as error:
-                print(f"Cannot load icon.\n{error}")
+            root.iconbitmap("note_save/icon.ico")
+        except TclError as error:
+            print(f"Cannot load icon.\n{error}")
 
         self.collection = DEFAULT_COLLECTION_NAME
 
