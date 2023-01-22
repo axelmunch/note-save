@@ -7,7 +7,7 @@ from PIL import Image, ImageTk
 
 from .configuration import (
     DEFAULT_PADDING,
-    EXPLORER_MAX_BY_PAGE,
+    EXPLORER_MAX_LINES_BY_PAGE,
     IMAGE_EXTENSION,
     MAX_PREVIEW_IMAGE_SIZE,
     PREVIEW_IMAGES_BY_LINE,
@@ -33,6 +33,8 @@ class ExplorerFrame(Frame):
 
         self.collection_content = []
         self.collection_page = 0
+        self.pages_media_length = []
+
         self.content_cache = []
 
         # GUI
@@ -74,7 +76,7 @@ class ExplorerFrame(Frame):
 
         # Content container
         self.content_container = tk.Frame(self.frame)
-        self.content_container.pack(fill=tk.BOTH, expand=True, padx=DEFAULT_PADDING)
+        self.content_container.pack(fill=tk.BOTH, expand=True)
 
         self.show()
 
@@ -94,6 +96,7 @@ class ExplorerFrame(Frame):
     def first_page(self):
         """Go to the first page"""
         self.collection_page = 0
+
         self.previous_next_buttons_state()
         self.refresh()
 
@@ -107,9 +110,7 @@ class ExplorerFrame(Frame):
 
     def next_page(self):
         """Go to the next page"""
-        if self.collection_page + 1 < ceil(
-            len(self.collection_content) / EXPLORER_MAX_BY_PAGE
-        ):
+        if self.collection_page + 1 < self.page_count():
             self.collection_page += 1
 
             self.previous_next_buttons_state()
@@ -117,28 +118,73 @@ class ExplorerFrame(Frame):
 
     def last_page(self):
         """Go to the last page"""
-        self.collection_page = max(
-            0, ceil(len(self.collection_content) / EXPLORER_MAX_BY_PAGE) - 1
-        )
+        self.collection_page = self.page_count() - 1
+
         self.previous_next_buttons_state()
         self.refresh()
 
     def previous_next_buttons_state(self):
         """Enable or disable the previous and next buttons"""
-        if self.collection_page == 0:
-            self.previous_page_button.config(state=tk.DISABLED)
-            self.first_page_button.config(state=tk.DISABLED)
-        elif len(self.collection_content) / EXPLORER_MAX_BY_PAGE > 1:
+        if self.collection_page > 0:
             self.previous_page_button.config(state=tk.NORMAL)
             self.first_page_button.config(state=tk.NORMAL)
-        if len(self.collection_content) / EXPLORER_MAX_BY_PAGE > 1:
+        else:
+            self.previous_page_button.config(state=tk.DISABLED)
+            self.first_page_button.config(state=tk.DISABLED)
+
+        if self.collection_page + 1 < self.page_count():
             self.next_page_button.config(state=tk.NORMAL)
             self.last_page_button.config(state=tk.NORMAL)
-        if self.collection_page + 1 >= ceil(
-            len(self.collection_content) / EXPLORER_MAX_BY_PAGE
-        ):
+        else:
             self.next_page_button.config(state=tk.DISABLED)
             self.last_page_button.config(state=tk.DISABLED)
+
+    def get_pages_media_number(self):
+        """Get the number of medias for each page and line"""
+        self.pages_media_length = []
+        page = []
+        lines_in_page = 0
+        lines = []
+        line = []
+
+        # list[tuple[list[str], str]] [(file names, text) ...]
+        for content in self.collection_content:
+            # Get the number of medias in the content, 1 by default for the text
+            media_length = max(1, len(content[0]))
+
+            if sum(line) + media_length <= PREVIEW_IMAGES_BY_LINE:
+                # The media length can be added to the page
+                line.append(media_length)
+            else:
+                # The line is full, add it to the list
+                lines.append(line)
+                line = [media_length]
+
+        # Add the rest
+        if len(line) > 0:
+            lines.append(line)
+
+        for line in lines:
+            # If line contains more than PREVIEW_IMAGES_BY_LINE medias, it will take multiple lines
+            line_and_overflow = ceil(sum(line) / PREVIEW_IMAGES_BY_LINE)
+
+            if lines_in_page + line_and_overflow <= EXPLORER_MAX_LINES_BY_PAGE:
+                # The line can be added to the page
+                page.append(line)
+                lines_in_page += line_and_overflow
+            else:
+                # The page is full, add it to the list
+                self.pages_media_length.append(page)
+                page = [line]
+                lines_in_page = line_and_overflow
+
+        # Add the rest
+        if len(page) > 0:
+            self.pages_media_length.append(page)
+
+    def page_count(self):
+        """Get the number of pages"""
+        return len(self.pages_media_length)
 
     def full_refresh(self):
         """Load collection content and refresh"""
@@ -147,11 +193,10 @@ class ExplorerFrame(Frame):
 
     def refresh(self):
         """Refresh the frame content"""
-        self.load_collection_content()
+        self.display_collection_content()
 
         self.page_label.config(
-            text=f"{self.collection_page + 1}/"
-            f"{max(1, ceil(len(self.collection_content) / EXPLORER_MAX_BY_PAGE))}"
+            text=f"{self.collection_page + 1}/" f"{max(1, self.page_count())}"
         )
         self.previous_next_buttons_state()
 
@@ -159,15 +204,12 @@ class ExplorerFrame(Frame):
         """Get the collection content data"""
         self.collection_content = load(self.collection)
         self.collection_content.reverse()
-        if self.collection_page + 1 > ceil(
-            len(self.collection_content) / EXPLORER_MAX_BY_PAGE
-        ):
-            self.collection_page = ceil(
-                len(self.collection_content) / EXPLORER_MAX_BY_PAGE
-            )
+        self.get_pages_media_number()
+        if self.collection_page + 1 > self.page_count():
+            self.collection_page = self.page_count() - 1
             self.previous_next_buttons_state()
 
-    def load_collection_content(self):
+    def display_collection_content(self):
         """Display the collection content in the frame"""
 
         # Reset the cache
@@ -180,40 +222,86 @@ class ExplorerFrame(Frame):
         # Empty element to reset size
         tk.Frame(self.content_container, width=0, height=0).pack()
 
+        # Find the index of the first element in the page
+        starting_index = 0
+        for page_index in range(0, self.collection_page):
+            starting_index += sum([len(l) for l in self.pages_media_length[page_index]])
+
         # Display the content
-        for content_index in range(
-            self.collection_page * EXPLORER_MAX_BY_PAGE,
-            self.collection_page * EXPLORER_MAX_BY_PAGE + EXPLORER_MAX_BY_PAGE,
-        ):
-            if content_index >= len(self.collection_content):
-                break
+        if len(self.collection_content) > 0:
+            for content_index in range(
+                starting_index,
+                starting_index
+                + sum([len(l) for l in self.pages_media_length[self.collection_page]]),
+            ):
+                grid_x = None
+                # grid_y = None
+                columns = None
 
-            saved_element = self.collection_content[content_index]
+                # Find the location on the grid with the index
+                index_in_grid = 0
+                for line in range(len(self.pages_media_length[self.collection_page])):
+                    for column in range(
+                        len(self.pages_media_length[self.collection_page][line])
+                    ):
+                        if index_in_grid == content_index - starting_index:
+                            columns = self.pages_media_length[self.collection_page][
+                                line
+                            ][column]
+                            grid_x = column
+                            # grid_y = line
+                        index_in_grid += 1
 
-            if len(saved_element) == 2:
-                saved_element_image_names = [
-                    image_name for image_name in saved_element[0] if len(image_name) > 0
-                ]
+                saved_element = self.collection_content[content_index]
 
-                saved_element_text = saved_element[1]
+                if len(saved_element) == 2:
+                    # Names of the images
+                    saved_element_image_names = [
+                        image_name
+                        for image_name in saved_element[0]
+                        if len(image_name) > 0
+                    ]
 
-                self.content_cache.append(
-                    ContentFrame(
-                        self.content_container,
-                        saved_element_image_names,
-                        saved_element_text,
-                        self.collection,
-                        self.app.add_to_clipboard,
+                    # Text
+                    saved_element_text = saved_element[1]
+
+                    # Grid display as Frame (pack) containing ContentFrame (grid)
+                    if grid_x == 0:
+                        # New line
+                        self.content_cache.append(tk.Frame(self.content_container))
+                        self.content_cache[-1].pack()
+
+                    self.content_cache.insert(
+                        0,
+                        ContentFrame(
+                            self.content_cache[-1],
+                            saved_element_image_names,
+                            saved_element_text,
+                            self.collection,
+                            self.app.add_to_clipboard,
+                            grid_x,
+                            0,
+                            columns,
+                        ),
                     )
-                )
 
         self.app.resize()
 
 
 class ContentFrame:
-    """A content container with a delete and edit button"""
+    """A content container"""
 
-    def __init__(self, parent, image_names, text, collection, add_clipboard_function):
+    def __init__(
+        self,
+        parent,
+        image_names,
+        text,
+        collection,
+        add_clipboard_function,
+        grid_x,
+        grid_y,
+        columns,
+    ):
         self.parent = parent
         self.image_names = image_names
         self.text = text
@@ -221,6 +309,12 @@ class ContentFrame:
 
         # Function to add content to the clipboard
         self.add_clipboard_function = add_clipboard_function
+
+        # Grid position
+        self.grid_x = grid_x
+        self.grid_y = grid_y
+
+        self.columns = columns
 
         self.image_cache = []
 
@@ -244,7 +338,11 @@ class ContentFrame:
             copy_button.pack()
 
             text_label = tk.Label(
-                self.frame, bg=SECONDARY_BACKGROUND_COLOR, fg=TEXT_COLOR, text=self.text
+                self.frame,
+                bg=SECONDARY_BACKGROUND_COLOR,
+                fg=TEXT_COLOR,
+                text=self.text,
+                wraplength=MAX_PREVIEW_IMAGE_SIZE * self.columns,
             )
             text_label.pack()
 
@@ -285,14 +383,14 @@ class ContentFrame:
             display_image = ImageTk.PhotoImage(image_resized)
 
             # Display the image
-            self.create_button(display_image, image_path, index)
+            self.create_open_button(display_image, image_path, index)
             self.image_cache.append(display_image)
 
             index += 1
 
         self.show()
 
-    def create_button(self, image, path, index):
+    def create_open_button(self, image, path, index):
         """Create button to preview and open the image"""
         button_image = tk.Button(
             self.image_container, image=image, command=lambda: open_file(path)
@@ -306,8 +404,13 @@ class ContentFrame:
 
     def show(self):
         """Show the image container"""
-        self.frame.pack(pady=DEFAULT_PADDING)
+        self.frame.grid(
+            padx=DEFAULT_PADDING,
+            pady=DEFAULT_PADDING,
+            row=self.grid_y,
+            column=self.grid_x,
+        )
 
     def hide(self):
         """Hide the image container"""
-        self.frame.pack_forget()
+        self.frame.grid_forget()
