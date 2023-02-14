@@ -2,6 +2,8 @@
 
 import tkinter as tk
 from math import ceil
+from threading import Thread
+from tkinter import TclError
 
 from PIL import Image, ImageTk
 
@@ -381,36 +383,40 @@ class ContentFrame:
 
         for image_name in self.image_names:
             image_path = f"{SAVE_FOLDER}/{collection}/{image_name}{IMAGE_EXTENSION}"
-            try:
-                image = Image.open(image_path)
-            except FileNotFoundError:
-                continue
-
-            # Resize the image with the size limit (keeping ratio)
-            image_width = image.width
-            image_height = image.height
-            if image_width > image_height:
-                resize_width = MAX_PREVIEW_IMAGE_SIZE
-                resize_height = int(
-                    image_height / (image_width / MAX_PREVIEW_IMAGE_SIZE)
-                )
-            else:
-                resize_height = MAX_PREVIEW_IMAGE_SIZE
-                resize_width = int(
-                    image_width / (image_height / MAX_PREVIEW_IMAGE_SIZE)
-                )
-            image_resized = image.resize((resize_width, resize_height), Image.ANTIALIAS)
-
-            # Convert the image for Tkinter
-            display_image = ImageTk.PhotoImage(image_resized)
-
-            # Display the image
-            self.create_open_button(display_image, image_path, index)
-            self.image_cache.append(display_image)
+            # self.load_image(image_path, index)
+            Thread(target=self.load_image, args=(image_path, index)).start()
 
             index += 1
 
         self.show()
+
+    def load_image(self, image_path, index):
+        """Load an image in the frame"""
+        try:
+            image = Image.open(image_path)
+        except FileNotFoundError:
+            return
+
+        # Resize the image with the size limit (keeping ratio)
+        image_width = image.width
+        image_height = image.height
+        if image_width > image_height:
+            resize_width = MAX_PREVIEW_IMAGE_SIZE
+            resize_height = int(image_height / (image_width / MAX_PREVIEW_IMAGE_SIZE))
+        else:
+            resize_height = MAX_PREVIEW_IMAGE_SIZE
+            resize_width = int(image_width / (image_height / MAX_PREVIEW_IMAGE_SIZE))
+        image_resized = image.resize((resize_width, resize_height), Image.ANTIALIAS)
+
+        # Convert the image for Tkinter
+        display_image = ImageTk.PhotoImage(image_resized)
+
+        # Display the image
+        try:
+            self.create_open_button(display_image, image_path, index)
+        except TclError:
+            return
+        self.image_cache.append(display_image)
 
     def create_open_button(self, image, path, index):
         """Create button to preview and open the image"""
