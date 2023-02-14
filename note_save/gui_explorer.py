@@ -39,6 +39,8 @@ class ExplorerFrame(Frame):
 
         self.reverse = tk.IntVar()
 
+        self.showing = False
+
         # GUI
 
         # Page navigation
@@ -92,17 +94,19 @@ class ExplorerFrame(Frame):
         self.show()
 
     def show(self):
+        self.showing = True
         self.frame.pack(fill=tk.BOTH, expand=True)
 
     def hide(self):
+        self.showing = False
         self.frame.pack_forget()
 
     def set_collection(self, collection):
         """Set the actual collection"""
         if collection != self.collection:
             self.collection_page = 0
-        self.collection = collection
-        self.full_refresh()
+            self.collection = collection
+            self.full_refresh()
 
     def first_page(self):
         """Go to the first page"""
@@ -204,8 +208,9 @@ class ExplorerFrame(Frame):
 
     def full_refresh(self):
         """Load collection content and refresh"""
-        self.get_collection_content()
-        self.refresh()
+        if self.showing:
+            self.get_collection_content()
+            self.refresh()
 
     def refresh(self):
         """Refresh the frame content"""
