@@ -37,6 +37,8 @@ class ExplorerFrame(Frame):
 
         self.content_cache = []
 
+        self.reverse = tk.IntVar()
+
         # GUI
 
         # Page navigation
@@ -73,6 +75,15 @@ class ExplorerFrame(Frame):
         self.last_page_button.grid(row=1, column=4)
 
         self.previous_next_buttons_state()
+
+        # Reverse checkbox
+        self.reverse_checkbutton = tk.Checkbutton(
+            self.controls_frame,
+            text="Reverse",
+            variable=self.reverse,
+            command=self.event_reverse,
+        )
+        self.reverse_checkbutton.grid(row=1, column=5, padx=DEFAULT_PADDING)
 
         # Content container
         self.content_container = tk.Frame(self.frame)
@@ -186,6 +197,11 @@ class ExplorerFrame(Frame):
         """Get the number of pages"""
         return len(self.pages_media_length)
 
+    def event_reverse(self, event=None):
+        """Reverse the collection"""
+        del event
+        self.full_refresh()
+
     def full_refresh(self):
         """Load collection content and refresh"""
         self.get_collection_content()
@@ -203,7 +219,8 @@ class ExplorerFrame(Frame):
     def get_collection_content(self):
         """Get the collection content data"""
         self.collection_content = load(self.collection)
-        self.collection_content.reverse()
+        if not self.reverse.get():
+            self.collection_content.reverse()
         self.get_pages_media_number()
         if self.collection_page + 1 > self.page_count():
             self.collection_page = self.page_count() - 1
