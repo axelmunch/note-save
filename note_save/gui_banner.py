@@ -1,7 +1,7 @@
 """Top banner GUI"""
 
 import tkinter as tk
-from tkinter import messagebox, ttk
+from tkinter import TclError, messagebox, ttk
 
 from .configuration import (
     BANNER_BACKGROUND_COLOR,
@@ -85,6 +85,10 @@ class BannerFrame(Frame):
         del event
         self.new_collection_window = tk.Toplevel(bg=PRIMARY_BACKGROUND_COLOR)
         self.new_collection_window.title("Create a collection")
+        try:
+            self.new_collection_window.iconbitmap("note_save/icon.ico")
+        except TclError as error:
+            print(f"Cannot load icon.\n{error}")
         # Title label
         label = tk.Label(
             self.new_collection_window,
